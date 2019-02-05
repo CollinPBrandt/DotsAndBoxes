@@ -12,7 +12,7 @@ public class Board {
         makeDots();
     }
 
-    private void makeDots(){
+    public void makeDots(){
         for(int row = 0; row < boardDimension + 1; row++){
             for(int column = 0; column < boardDimension + 1; column++){
                 //number dots 0 to boardDimensions + 1 squared
@@ -21,7 +21,7 @@ public class Board {
         }
     }
 
-    private void makeBoxes(){
+    public void makeBoxes(){
         for(int row = 0; row < boardDimension; row++){
             for(int column = 0; column < boardDimension; column++){
                 //number dots 0 to boardDimensions squared
