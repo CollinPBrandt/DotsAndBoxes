@@ -4,8 +4,5 @@ public class Main {
 
         Board board = new Board(2);
 
-        board.makeBoxes();
-        board.makeDots();
-
     }
 }
