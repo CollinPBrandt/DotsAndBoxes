@@ -30,12 +30,15 @@ public class Game {
             makeMove();
 
             if(player1Turn)
-                player1Score += board.checkBoxesForScore();
+                player1Score += board.checkBoardForScore();
             else
-                player2Score += board.checkBoxesForScore();
+                player2Score += board.checkBoardForScore();
 
-            printScore();
+            //Switch whose turn it is
             player1Turn = !player1Turn;
+
+            isGameOver();
+            printScore();
         }
     }
 
@@ -67,7 +70,7 @@ public class Game {
             }
 
             //check move in bounds
-            if(row > board.boardDimension || column > board.boardDimension) {
+            if(row > board.boardDimension - 1 || column > board.boardDimension - 1) {
                 System.out.println("That move is outside of the board, try again");
                 continue;
             }
@@ -91,6 +94,23 @@ public class Game {
                 System.out.println("Can only move on a line space, try again");
                 continue;
             }
+        }
+    }
+
+    public void isGameOver(){
+        if(player1Score + player2Score == board.totalBoardValue){
+            gameOver = true;
+
+            String winningPlayer;
+            if(player1Score > player2Score)
+                winningPlayer = "Player 1!";
+            else if (player1Score < player2Score)
+                winningPlayer = "Player 2!";
+            else
+                winningPlayer = "It's a Tie!";
+
+            System.out.println("Game Over!");
+            System.out.printf("The Winner is: %S\n", winningPlayer);
         }
     }
 

@@ -29,7 +29,7 @@ public class Line extends AbstractBoardElement {
             if (row % 2 == 0)
                 System.out.print(" -");
             else
-                System.out.print("|");
+                System.out.print(" |");
         }
         else{
             System.out.print("  ");

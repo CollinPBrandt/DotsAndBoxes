@@ -6,6 +6,7 @@ public class Board {
 
     public int boardDimension;
     public AbstractBoardElement[][] boardElements;
+    public int totalBoardValue;
 
     /////////////////////////////////////////////////////////////
     //Constructor
@@ -16,6 +17,9 @@ public class Board {
         this.boardElements = new AbstractBoardElement[boardDimension][boardDimension];
 
         fillBoardElement();
+
+        this.totalBoardValue = calcTotalBoardValue();
+
     }
 
     /////////////////////////////////////////////////////////////
@@ -32,7 +36,7 @@ public class Board {
         return null;
     }
 
-    public int checkBoxesForScore(){
+    public int checkBoardForScore(){
         //iterating over each box in boardElements(odd row and columns)
         for(int row = 1; row < boardDimension; row+= 2){
             for(int column = 1; column < boardDimension; column+= 2){
@@ -108,6 +112,18 @@ public class Board {
                 }
             }
         }
+    }
+
+    private int calcTotalBoardValue(){
+        int totalBoardValue = 0;
+
+        for(int row = 1; row < boardDimension; row+= 2){
+            for(int column = 1; column < boardDimension; column+= 2){
+                Box box = (Box)this.boardElements[row][column];
+                totalBoardValue += box.value;
+            }
+        }
+        return totalBoardValue;
     }
 
     private boolean checkBoxForScore(Box box){
