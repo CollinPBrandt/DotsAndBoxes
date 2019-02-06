@@ -22,12 +22,6 @@ public class Board {
     //Public methods
     /////////////////////////////////////////////////////////////
 
-
-    public void makeMove(int moveRow, int moveColumn){
-        Line move = (Line)findElement(moveRow, moveColumn);
-        move.drawLine();
-    }
-
     public AbstractBoardElement findElement(int findRow, int findColumn) {
         for (int row = 0; row < boardDimension; row++) {
             for (int column = 0; column < boardDimension; column++) {
@@ -46,8 +40,9 @@ public class Board {
                 //if box has not already been completed...
                  if(!box.complete){
                      //if box is now complete return value
-                     if(checkBoxForScore(box));
-                        return box.value;
+                     if(checkBoxForScore(box)) {
+                         return box.value;
+                     }
                  }
             }
         }
@@ -57,18 +52,38 @@ public class Board {
 
     public void printBoard(){
         System.out.println();
-        System.out.print(" ");
+
+        //column numbers
+        System.out.print("  ");
         for(int i = 0; i < boardDimension; i++){
-            System.out.print(i);
+            System.out.printf(" %d",i);
         }
 
+        System.out.println();
+        System.out.print("  ");
+
+        //top outline
+        for(int i = 0; i < boardDimension * 2 + 1; i++){
+            System.out.printf("-",i);
+        }
+
+        //row numbers, board elements, and left/right outline
         for(int row = 0; row < boardDimension; row++){
             System.out.println();
             System.out.print(row);
+            System.out.print("|");
             for(int column = 0; column < boardDimension; column++) {
                 boardElements[row][column].print();
             }
+            System.out.print(" |");
         }
+
+        //bottom outline
+        System.out.print("\n  ");
+        for(int i = 0; i < boardDimension * 2 + 1; i++){
+            System.out.printf("-",i);
+        }
+
         System.out.println();
     }
 

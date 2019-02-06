@@ -15,7 +15,7 @@ public class Dot extends AbstractBoardElement{
 
     @Override
     public void print() {
-        System.out.print("*");
+        System.out.print(" *");
     }
 }
 

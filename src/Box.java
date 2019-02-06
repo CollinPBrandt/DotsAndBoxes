@@ -1,3 +1,4 @@
+import java.util.Random;
 
 public class Box extends AbstractBoardElement{
 
@@ -15,7 +16,7 @@ public class Box extends AbstractBoardElement{
     public Box(int row, int column) {
         super(row, column);
         this.complete = false;
-        this.value = (int)(Math.random() * 5);
+        this.value = new Random().nextInt(6);
     }
 
     /////////////////////////////////////////////////////////////
@@ -24,7 +25,7 @@ public class Box extends AbstractBoardElement{
 
     @Override
     public void print() {
-        System.out.printf("%d", value);
+        System.out.printf(" %d", value);
     }
 }
 
