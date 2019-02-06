@@ -2,7 +2,9 @@ public class Main {
 
     public static void main(String[] args){
 
-        Board board = new Board(2);
-
+        Board board = new Board(5);
+        board.printBoard();
+        board.makeMove(0,1);
+        board.printBoard();
     }
 }

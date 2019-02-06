@@ -1,31 +1,38 @@
-
-public class Box extends AbstractBoardElement{
+public class Line extends AbstractBoardElement {
 
     /////////////////////////////////////////////////////////////
     //Fields
     /////////////////////////////////////////////////////////////
 
-    public int value;
-    public boolean complete;
+    boolean drawn;
 
     /////////////////////////////////////////////////////////////
     //Constructor
     /////////////////////////////////////////////////////////////
 
-    public Box(int row, int column) {
+    public Line(int row, int column) {
         super(row, column);
-        this.complete = false;
-        this.value = (int)(Math.random() * 5);
+        drawn = false;
     }
 
     /////////////////////////////////////////////////////////////
     //Methods
     /////////////////////////////////////////////////////////////
 
+    public void drawLine(){
+        this.drawn = true;
+    }
+
     @Override
     public void print() {
-        System.out.printf("%d", value);
+        if(drawn) {
+            if (row % 2 == 0)
+                System.out.print("-");
+            else
+                System.out.print("|");
+        }
+        else{
+            System.out.print(" ");
+        }
     }
 }
-
-

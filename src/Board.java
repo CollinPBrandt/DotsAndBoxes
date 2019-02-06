@@ -1,69 +1,114 @@
 public class Board {
 
-    public int boardBoxDimension; // side length in boxes
-    public int boardDotDimension;
-    public Dot[][] dots;
-    public Box[][] boxes;
+    /////////////////////////////////////////////////////////////
+    //Fields
+    /////////////////////////////////////////////////////////////
+
+    public int boardDimension;
+    public AbstractBoardElement[][] boardElements;
+
+    /////////////////////////////////////////////////////////////
+    //Constructor
+    /////////////////////////////////////////////////////////////
 
     public Board(int boardDimension) {
-        this.boardBoxDimension = boardDimension;
-        this.boardDotDimension = boardBoxDimension + 1;
-        this.dots = new Dot[boardDimension + 1][boardDimension + 1];
-        this.boxes = new Box[boardDimension][boardDimension];
+        this.boardDimension = boardDimension;
+        this.boardElements = new AbstractBoardElement[boardDimension][boardDimension];
 
-        makeDots();
-        makeBoxes();
-
-        makeAllDotNeighbors();
-        findAllCornerDots();
+        fillBoardElement();
     }
 
-    public void makeDots(){
-        for(int row = 0; row < boardDotDimension; row++){
-            for(int column = 0; column < boardDotDimension; column++){
-                //number dots 0 to boardDotDimensions
-                dots[row][column] = new Dot((row * boardDotDimension) + column);
-            }
-        }
+    /////////////////////////////////////////////////////////////
+    //Public methods
+    /////////////////////////////////////////////////////////////
+
+
+    public void makeMove(int moveRow, int moveColumn){
+        Line move = (Line)findElement(moveRow, moveColumn);
+        move.drawLine();
     }
 
-    public void makeBoxes(){
-        for(int row = 0; row < boardBoxDimension; row++){
-            for(int column = 0; column < boardBoxDimension; column++){
-                //number dots 0 to boardDimensions squared
-                boxes[row][column] = new Box((row * boardBoxDimension) + column);
-            }
-        }
-    }
-
-    public Dot getDot(int index){
-        for (int row = 0; row < this.boardDotDimension; row++) {
-            for (int column = 0; column < this.boardDotDimension; column++) {
-                if(this.dots[row][column].index == index)
-                    return this.dots[row][column];
+    public AbstractBoardElement findElement(int findRow, int findColumn) {
+        for (int row = 0; row < boardDimension; row++) {
+            for (int column = 0; column < boardDimension; column++) {
+                if (findRow == row && findColumn == column)
+                    return this.boardElements[row][column];
             }
         }
         return null;
     }
 
-    public void makeAllDotNeighbors(){
-        for (int row = 0; row < this.boardDotDimension; row++) {
-            for (int column = 0; column < this.boardDotDimension; column++) {
-                this.dots[row][column].findDotNeighbors(this);
+    public int checkBoxesForScore(){
+        //iterating over each box in boardElements(odd row and columns)
+        for(int row = 1; row < boardDimension; row+= 2){
+            for(int column = 1; column < boardDimension; column+= 2){
+                Box box = (Box)this.boardElements[row][column];
+                //if box has not already been completed...
+                 if(!box.complete){
+                     //if box is now complete return value
+                     if(checkBoxForScore(box));
+                        return box.value;
+                 }
+            }
+        }
+        return 0;
+    }
+
+
+    public void printBoard(){
+        System.out.println();
+        System.out.print(" ");
+        for(int i = 0; i < boardDimension; i++){
+            System.out.print(i);
+        }
+
+        for(int row = 0; row < boardDimension; row++){
+            System.out.println();
+            System.out.print(row);
+            for(int column = 0; column < boardDimension; column++) {
+                boardElements[row][column].print();
+            }
+        }
+        System.out.println();
+    }
+
+    /////////////////////////////////////////////////////////////
+    //Private methods
+    /////////////////////////////////////////////////////////////
+
+    private void fillBoardElement(){
+        for(int row = 0; row < boardDimension; row++){
+            for(int column = 0; column < boardDimension; column++){
+                if(row % 2 == 0){
+                    if(column % 2 == 0)
+                        boardElements[row][column] = new Dot(row, column);
+                    else
+                        boardElements[row][column] = new Line(row, column);
+                }
+                else{
+                    if(column % 2 == 0)
+                        boardElements[row][column] = new Line(row, column);
+                    else
+                        boardElements[row][column] = new Box(row, column);
+                }
             }
         }
     }
 
-    public void findAllCornerDots(){
-        for(int row = 0; row < boardBoxDimension; row++){
-            for(int column = 0; column < boardBoxDimension; column++){
-                this.boxes[row][column].findDotCorners(this);
-            }
+    private boolean checkBoxForScore(Box box){
+        //Grab reference to each line around box
+        Line lineAbove = (Line)this.boardElements[box.row + 1][box.column];
+        Line lineBelow = (Line)this.boardElements[box.row - 1][box.column];
+        Line lineLeft = (Line)this.boardElements[box.row][box.column - 1];
+        Line lineRight = (Line)this.boardElements[box.row][box.column + 1];
+
+        //if all those lines are drawn return true as it scored
+        if(lineAbove.drawn && lineBelow.drawn && lineLeft.drawn && lineRight.drawn) {
+            box.complete = true;
+            return true;
         }
+
+        return false;
+
     }
-
-    public void drawBoard(){
-
-    }
-
 }
