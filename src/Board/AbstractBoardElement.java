@@ -1,32 +1,26 @@
-import java.util.Random;
+package Board;
 
-public class Box extends AbstractBoardElement{
+public abstract class AbstractBoardElement {
 
     /////////////////////////////////////////////////////////////
     //Fields
     /////////////////////////////////////////////////////////////
 
-    public int value;
-    public boolean complete;
+    public int row;
+    public int column;
 
     /////////////////////////////////////////////////////////////
     //Constructor
     /////////////////////////////////////////////////////////////
 
-    public Box(int row, int column) {
-        super(row, column);
-        this.complete = false;
-        this.value = new Random().nextInt(6);
+    public AbstractBoardElement(int row, int column) {
+        this.row = row;
+        this.column = column;
     }
 
     /////////////////////////////////////////////////////////////
-    //Methods
+    //Abstract Methods
     /////////////////////////////////////////////////////////////
 
-    @Override
-    public void print() {
-        System.out.printf(" %d", value);
-    }
+    public abstract void print();
 }
-
-

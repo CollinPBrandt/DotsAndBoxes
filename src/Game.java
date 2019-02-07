@@ -1,3 +1,6 @@
+import Board.Board;
+import Board.Line;
+
 import java.util.Scanner;
 
 public class Game {
@@ -110,6 +113,7 @@ public class Game {
                 winningPlayer = "It's a Tie!";
 
             System.out.println("Game Over!");
+            board.printBoard();
             System.out.printf("The Winner is: %S\n", winningPlayer);
         }
     }

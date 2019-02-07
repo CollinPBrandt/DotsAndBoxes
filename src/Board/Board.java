@@ -1,3 +1,5 @@
+package Board;
+
 public class Board {
 
     /////////////////////////////////////////////////////////////
@@ -27,6 +29,7 @@ public class Board {
     /////////////////////////////////////////////////////////////
 
     public AbstractBoardElement findElement(int findRow, int findColumn) {
+        //Given a row and column, returns the elements at that point
         for (int row = 0; row < boardDimension; row++) {
             for (int column = 0; column < boardDimension; column++) {
                 if (findRow == row && findColumn == column)
@@ -42,8 +45,8 @@ public class Board {
             for(int column = 1; column < boardDimension; column+= 2){
                 Box box = (Box)this.boardElements[row][column];
                 //if box has not already been completed...
-                 if(!box.complete){
-                     //if box is now complete return value
+                 if(!box.isComplete){
+                     //if box is now isComplete return value
                      if(checkBoxForScore(box)) {
                          return box.value;
                      }
@@ -135,7 +138,7 @@ public class Board {
 
         //if all those lines are drawn return true as it scored
         if(lineAbove.drawn && lineBelow.drawn && lineLeft.drawn && lineRight.drawn) {
-            box.complete = true;
+            box.isComplete = true;
             return true;
         }
 

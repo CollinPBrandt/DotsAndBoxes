@@ -1,5 +1,6 @@
+package Board;
 
-public class Dot extends AbstractBoardElement{
+public class Dot extends AbstractBoardElement {
 
     /////////////////////////////////////////////////////////////
     //Constructor
