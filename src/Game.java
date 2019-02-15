@@ -1,5 +1,6 @@
-import Board.Board;
-import Board.Line;
+import Board.*;
+import MinMax.Algorithm;
+import MinMax.Node;
 
 import java.util.Scanner;
 
@@ -10,16 +11,34 @@ public class Game {
     int player2Score;
     Boolean gameOver;
     Boolean player1Turn;
+    Boolean player1IsAI;
+    Boolean player2IsAI;
+
+    /////////////////////////////////////////////////////////////
+    //Constructor
+    /////////////////////////////////////////////////////////////
 
     public Game(int boardDimensions){
         this.board = new Board(boardDimensions);
+        //track score
         this.player1Score = 0;
         this.player2Score = 0;
-        this.gameOver = false;
+        //track who's turn
         this.player1Turn = true;
+        //track who is human/AI
+        this.player1IsAI = false;
+        this.player2IsAI = false;
+        //track game state
+        this.gameOver = false;
     }
 
+    /////////////////////////////////////////////////////////////
+    //Public Methods
+    /////////////////////////////////////////////////////////////
+
     public void play(){
+
+        playerSelect();
 
         while(!gameOver){
 
@@ -45,9 +64,48 @@ public class Game {
         }
     }
 
-    public void makeMove(){
-        int row;
-        int column;
+    /////////////////////////////////////////////////////////////
+    //Private Methods
+    /////////////////////////////////////////////////////////////
+
+    private void playerSelect() {
+
+        System.out.println("Press 1 for AI player 1, press anything else for human player 1");
+
+        Scanner scanner1 = new Scanner(System.in);
+        if (scanner1.hasNextInt()) {
+            if (scanner1.nextInt() == 1) {
+                player1IsAI = true;
+            }
+        }
+
+        Scanner scanner2 = new Scanner(System.in);
+        System.out.println("Press 2 for AI player 2, press anything else for human player 2");
+        if (scanner2.hasNextInt()) {
+            if (scanner2.nextInt() == 2) {
+                player2IsAI = true;
+            }
+        }
+    }
+
+
+    private void makeMove(){
+        //if the current player is AI, do their move
+        if((player1Turn && player1IsAI) || (!player1Turn && player2IsAI)){
+            makeAIMove();
+        }
+        else{
+            makeHumanMove();
+        }
+    }
+
+    private void makeAIMove(){
+        Algorithm algorithm = new Algorithm(new Node(null, board), 2);
+        algorithm.expand();
+    }
+
+    private void makeHumanMove(){
+        Move move = new Move(-1, -1);
         Boolean validMove = false;
 
         while(!validMove) {
@@ -57,50 +115,31 @@ public class Game {
             //get move, checking that it is two ints
             Scanner scanner = new Scanner(System.in);
             if (scanner.hasNextInt()) {
-                row = scanner.nextInt();
-            }
-            else {
+                move.row = scanner.nextInt();
+            } else {
                 System.out.println("Incorrect input format");
                 continue;
             }
 
-            if (scanner.hasNextInt()){
-                column = scanner.nextInt();
+            if (scanner.hasNextInt()) {
+                move.column = scanner.nextInt();
+            } else {
+                System.out.println("Incorrect input format");
+                continue;
+            }
+            if(board.checkIfMoveIsLegal(move)){
+                //if move is legal, draw it. Else try again (continue);
+                Line line = (Line) this.board.boardElements[move.row][move.column];
+                line.drawLine();
+                validMove = true;
             }
             else{
-                System.out.println("Incorrect input format");
-                continue;
-            }
-
-            //check move in bounds
-            if(row > board.boardDimension - 1 || column > board.boardDimension - 1) {
-                System.out.println("That move is outside of the board, try again");
-                continue;
-            }
-
-            //check if move is on a line space
-            if (board.findElement(row, column) instanceof Line) {
-                Line line = (Line) this.board.boardElements[row][column];
-
-                //check if that line has been drawn
-                if(line.drawn == true){
-                    System.out.println("That line has already been drawn, try again");
-                    continue;
-                } else {
-                    //Move is on an empty line, good to draw
-                    line.drawLine();
-                    validMove = true;
-                }
-
-            //else print illegal move and try again
-            } else {
-                System.out.println("Can only move on a line space, try again");
                 continue;
             }
         }
     }
 
-    public void isGameOver(){
+    private void isGameOver(){
         if(player1Score + player2Score == board.totalBoardValue){
             gameOver = true;
 
@@ -118,7 +157,7 @@ public class Game {
         }
     }
 
-    public void printScore(){
+    private void printScore(){
         System.out.printf("\nPlayer 1 Score: %d\n", player1Score);
         System.out.printf("Player 2 Score: %d\n", player2Score);
 
