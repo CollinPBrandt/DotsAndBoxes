@@ -14,6 +14,7 @@ public class Node {
         this.parent = parent;
         this.children = new ArrayList<>();
         this.board = board;
+        //starts at true for root, gets set to opposite of it's parent for all children
         this.isMax = true;
     }
 
@@ -21,11 +22,13 @@ public class Node {
         ArrayList<Move> possibleMoves = board.getAllPossibleMoves();
         //iterate over all possible moves
         for(Move move : possibleMoves){
-            //make copy of board and add move
-            Board childBoard = board.copyBoard();
-            childBoard.addLine(move);
-            //make child node using new board
+            //make copy of rootBoard and add move
+            Board childBoard = board.deepCopyBoard();
+            childBoard.makeMove(move);
+            //make child node using new rootBoard
             Node childNode = new Node(this, childBoard);
+            //swap between max and min
+            childNode.isMax = !this.isMax;
             //add to children list
             children.add(childNode);
         }

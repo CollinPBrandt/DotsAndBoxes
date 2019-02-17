@@ -1,16 +1,12 @@
 import Board.*;
-import MinMax.Algorithm;
-import MinMax.Node;
+import MinMax.MiniMax;
 
 import java.util.Scanner;
 
 public class Game {
 
     Board board;
-    int player1Score;
-    int player2Score;
     Boolean gameOver;
-    Boolean player1Turn;
     Boolean player1IsAI;
     Boolean player2IsAI;
 
@@ -20,11 +16,6 @@ public class Game {
 
     public Game(int boardDimensions){
         this.board = new Board(boardDimensions);
-        //track score
-        this.player1Score = 0;
-        this.player2Score = 0;
-        //track who's turn
-        this.player1Turn = true;
         //track who is human/AI
         this.player1IsAI = false;
         this.player2IsAI = false;
@@ -44,20 +35,17 @@ public class Game {
 
             board.printBoard();
 
-            if(player1Turn)
+            if(board.isPlayer1Turn)
                 System.out.println("\nPlayer 1's Turn:");
             else
                 System.out.println("\nPlayer 2's Turn:");
 
             makeMove();
 
-            if(player1Turn)
-                player1Score += board.checkBoardForScore();
-            else
-                player2Score += board.checkBoardForScore();
+            //board.checkForAndUpdateScore();
 
             //Switch whose turn it is
-            player1Turn = !player1Turn;
+            board.isPlayer1Turn = !board.isPlayer1Turn;
 
             isGameOver();
             printScore();
@@ -90,8 +78,8 @@ public class Game {
 
 
     private void makeMove(){
-        //if the current player is AI, do their move
-        if((player1Turn && player1IsAI) || (!player1Turn && player2IsAI)){
+        //if the current player is AI, do their makeMove
+        if((board.isPlayer1Turn && player1IsAI) || (!board.isPlayer1Turn && player2IsAI)){
             makeAIMove();
         }
         else{
@@ -100,8 +88,8 @@ public class Game {
     }
 
     private void makeAIMove(){
-        Algorithm algorithm = new Algorithm(new Node(null, board), 2);
-        algorithm.expand();
+        MiniMax miniMax = new MiniMax(board, 4);
+        miniMax.makeAIMove();
     }
 
     private void makeHumanMove(){
@@ -112,7 +100,7 @@ public class Game {
 
             System.out.println("Input Format: row column");
 
-            //get move, checking that it is two ints
+            //get makeMove, checking that it is two ints
             Scanner scanner = new Scanner(System.in);
             if (scanner.hasNextInt()) {
                 move.row = scanner.nextInt();
@@ -128,10 +116,9 @@ public class Game {
                 continue;
             }
             if(board.checkIfMoveIsLegal(move)){
-                //if move is legal, draw it. Else try again (continue);
-                Line line = (Line) this.board.boardElements[move.row][move.column];
-                line.drawLine();
                 validMove = true;
+                //if makeMove is legal, draw it. Else try again (continue);
+                board.makeMove(move);
             }
             else{
                 continue;
@@ -140,13 +127,13 @@ public class Game {
     }
 
     private void isGameOver(){
-        if(player1Score + player2Score == board.totalBoardValue){
+        if(board.isBoardComplete()){
             gameOver = true;
 
             String winningPlayer;
-            if(player1Score > player2Score)
+            if(board.player1Score > board.player2Score)
                 winningPlayer = "Player 1!";
-            else if (player1Score < player2Score)
+            else if (board.player1Score < board.player2Score)
                 winningPlayer = "Player 2!";
             else
                 winningPlayer = "It's a Tie!";
@@ -158,8 +145,8 @@ public class Game {
     }
 
     private void printScore(){
-        System.out.printf("\nPlayer 1 Score: %d\n", player1Score);
-        System.out.printf("Player 2 Score: %d\n", player2Score);
+        System.out.printf("\nPlayer 1 Score: %d\n", board.player1Score);
+        System.out.printf("Player 2 Score: %d\n", board.player2Score);
 
     }
 
