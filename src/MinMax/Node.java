@@ -24,7 +24,7 @@ public class Node {
         for(Move move : possibleMoves){
             //make copy of rootBoard and add move
             Board childBoard = board.deepCopyBoard();
-            childBoard.makeMove(move);
+            childBoard.makeMoveOnBoard(move);
             //make child node using new rootBoard
             Node childNode = new Node(this, childBoard);
             //swap between max and min

@@ -1,26 +1,26 @@
 import Board.*;
-import MinMax.MiniMax;
 
 import java.util.Scanner;
 
 public class Game {
 
     Board board;
+    int prys;
     Boolean gameOver;
-    Boolean player1IsAI;
-    Boolean player2IsAI;
+
+    AbstractPlayer player1;
+    AbstractPlayer player2;
 
     /////////////////////////////////////////////////////////////
     //Constructor
     /////////////////////////////////////////////////////////////
 
-    public Game(int boardDimensions){
+    public Game(int boardDimensions, int prys){
         this.board = new Board(boardDimensions);
-        //track who is human/AI
-        this.player1IsAI = false;
-        this.player2IsAI = false;
+        this.prys = prys;
         //track game state
         this.gameOver = false;
+
     }
 
     /////////////////////////////////////////////////////////////
@@ -30,6 +30,7 @@ public class Game {
     public void play(){
 
         playerSelect();
+        board.getPlayers(player1, player2);
 
         while(!gameOver){
 
@@ -40,9 +41,10 @@ public class Game {
             else
                 System.out.println("\nPlayer 2's Turn:");
 
-            makeMove();
-
-            //board.checkForAndUpdateScore();
+            if(board.isPlayer1Turn)
+                player1.makeMove(board);
+            else
+                player2.makeMove(board);
 
             //Switch whose turn it is
             board.isPlayer1Turn = !board.isPlayer1Turn;
@@ -58,70 +60,39 @@ public class Game {
 
     private void playerSelect() {
 
-        System.out.println("Press 1 for AI player 1, press anything else for human player 1");
-
         Scanner scanner1 = new Scanner(System.in);
-        if (scanner1.hasNextInt()) {
-            if (scanner1.nextInt() == 1) {
-                player1IsAI = true;
-            }
-        }
+        boolean legalInput1 = false;
+        boolean legalInput2 = false;
 
-        Scanner scanner2 = new Scanner(System.in);
-        System.out.println("Press 2 for AI player 2, press anything else for human player 2");
-        if (scanner2.hasNextInt()) {
-            if (scanner2.nextInt() == 2) {
-                player2IsAI = true;
-            }
-        }
-    }
-
-
-    private void makeMove(){
-        //if the current player is AI, do their makeMove
-        if((board.isPlayer1Turn && player1IsAI) || (!board.isPlayer1Turn && player2IsAI)){
-            makeAIMove();
-        }
-        else{
-            makeHumanMove();
-        }
-    }
-
-    private void makeAIMove(){
-        MiniMax miniMax = new MiniMax(board, 4);
-        miniMax.makeAIMove();
-    }
-
-    private void makeHumanMove(){
-        Move move = new Move(-1, -1);
-        Boolean validMove = false;
-
-        while(!validMove) {
-
-            System.out.println("Input Format: row column");
-
-            //get makeMove, checking that it is two ints
-            Scanner scanner = new Scanner(System.in);
-            if (scanner.hasNextInt()) {
-                move.row = scanner.nextInt();
+        while(legalInput1 == false) {
+            System.out.println("Type 'Human' for human player1, or 'AI' for AI player1");
+            String p1 = scanner1.nextLine();
+            if (p1.equals("AI")) {
+                System.out.println("Player1 is an AI\n");
+                player1 = new AIPlayer(prys);
+                legalInput1 = true;
+            } else if (p1.equals("Human")) {
+                System.out.println("Player1 is a Human\n");
+                player1 = new HumanPlayer();
+                legalInput1 = true;
             } else {
-                System.out.println("Incorrect input format");
-                continue;
+                System.out.println("Unknown Input");
             }
+        }
+        while(legalInput2 == false){
+            System.out.println("Type 'Human' for human player2, or 'AI' for AI player2");
+            String p2 = scanner1.nextLine();
 
-            if (scanner.hasNextInt()) {
-                move.column = scanner.nextInt();
-            } else {
-                System.out.println("Incorrect input format");
-                continue;
-            }
-            if(board.checkIfMoveIsLegal(move)){
-                validMove = true;
-                //if makeMove is legal, draw it. Else try again (continue);
-                board.makeMove(move);
-            }
-            else{
-                continue;
+            if(p2.equals("AI")) {
+                System.out.println("Player2 is an AI\n");
+                player2 = new AIPlayer(prys);
+                legalInput2 = true;
+            } else if(p2.equals("Human")){
+                System.out.println("Player2 is an Human\n");
+                player2 = new HumanPlayer();
+                legalInput2 = true;
+            } else{
+                System.out.println("Unknown Input");
             }
         }
     }
@@ -131,9 +102,9 @@ public class Game {
             gameOver = true;
 
             String winningPlayer;
-            if(board.player1Score > board.player2Score)
+            if(board.getPlayer1Score() > board.getPlayer2Score())
                 winningPlayer = "Player 1!";
-            else if (board.player1Score < board.player2Score)
+            else if (board.getPlayer1Score() < board.getPlayer2Score())
                 winningPlayer = "Player 2!";
             else
                 winningPlayer = "It's a Tie!";
@@ -145,8 +116,8 @@ public class Game {
     }
 
     private void printScore(){
-        System.out.printf("\nPlayer 1 Score: %d\n", board.player1Score);
-        System.out.printf("Player 2 Score: %d\n", board.player2Score);
+        System.out.printf("\nPlayer 1 Score: %d\n", board.getPlayer1Score());
+        System.out.printf("Player 2 Score: %d\n", board.getPlayer2Score());
 
     }
 

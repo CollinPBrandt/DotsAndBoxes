@@ -9,7 +9,7 @@ public class Box extends AbstractBoardElement {
     /////////////////////////////////////////////////////////////
 
     public int value;
-    public boolean isComplete;
+    public AbstractPlayer scoringPlayer;
 
     /////////////////////////////////////////////////////////////
     //Constructor
@@ -17,8 +17,8 @@ public class Box extends AbstractBoardElement {
 
     public Box(int row, int column) {
         super(row, column);
-        this.isComplete = false;
         this.value = new Random().nextInt(6);
+        this.scoringPlayer = null;
     }
 
     /////////////////////////////////////////////////////////////

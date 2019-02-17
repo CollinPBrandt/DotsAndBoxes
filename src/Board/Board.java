@@ -1,6 +1,7 @@
 package Board;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 public class Board {
 
@@ -10,9 +11,12 @@ public class Board {
 
     public int boardDimension;
     public AbstractBoardElement[][] boardElements;
+    public Box[] boxes;
+    public Line[] lines;
     public boolean isPlayer1Turn;
-    public int player1Score;
-    public int player2Score;
+
+    public AbstractPlayer player1;
+    public AbstractPlayer player2;
 
     /////////////////////////////////////////////////////////////
     //Constructor
@@ -22,76 +26,83 @@ public class Board {
         this.boardDimension = boardDimension;
         this.boardElements = new AbstractBoardElement[boardDimension][boardDimension];
         this.isPlayer1Turn = true;
-        this.player1Score = 0;
-        this.player2Score = 0;
 
         fillBoardElement();
+        this.boxes = getBoxes();
+        this.lines = getLines();
     }
 
     /////////////////////////////////////////////////////////////
-    //Public methods
+    //SetUp Methods
     /////////////////////////////////////////////////////////////
 
-    public int checkForScore(){
-        int moveScore = 0;
-        //iterating over each box in boardElements(odd row and columns)
-        for(int row = 1; row < boardDimension; row+= 2){
-            for(int column = 1; column < boardDimension; column+= 2){
-                Box box = (Box)this.boardElements[row][column];
-                //if box has not already been completed...
-                 if(!box.isComplete){
-                     //if box is now isComplete, set as complete, return value
-                     if(isBoxComplete(box)) {
-                         box.isComplete = true;
-                         moveScore += box.value;
-                     }
-                 }
-            }
-        }
-        return moveScore;
-    }
-
-    public void updateScore(int moveScore){
-        if(isPlayer1Turn)
-            player1Score += moveScore;
-        else
-            player2Score += moveScore;
-    }
-
-    public Board deepCopyBoard(){
-        //copying fields
-        Board newBoard = new Board(boardDimension);
-        newBoard.isPlayer1Turn = this.isPlayer1Turn;
-
-        //need to copy all elements over
+    private void fillBoardElement(){
         for(int row = 0; row < boardDimension; row++){
             for(int column = 0; column < boardDimension; column++){
                 if(row % 2 == 0){
-                    if(column % 2 != 0){
-                        //must maintain drawn lines
-                        Line thisLine = (Line)this.boardElements[row][column];
-                        Line newLine = (Line)newBoard.boardElements[row][column];
-                        newLine.drawn = thisLine.drawn;
+                    if(column % 2 == 0)
+                        boardElements[row][column] = new Dot(row, column);
+                    else
+                        boardElements[row][column] = new Line(row, column);
+                }
+                else{
+                    if(column % 2 == 0)
+                        boardElements[row][column] = new Line(row, column);
+                    else
+                        boardElements[row][column] = new Box(row, column);
+                }
+            }
+        }
+    }
+
+    private Box[] getBoxes(){
+        Box[] boxes = new Box[(boardDimension/2)*(boardDimension/2)];
+        int index = 0;
+        for(int row = 1; row < boardDimension; row+= 2){
+            for(int column = 1; column < boardDimension; column+= 2) {
+                boxes[index] = (Box)boardElements[row][column];
+                index++;
+            }
+        }
+        return boxes;
+    }
+
+    private Line[] getLines(){
+        Line[] lines = new Line[(boardDimension/2)*(boardDimension + 1)];
+        int index = 0;
+        for(int row = 0; row < boardDimension; row++){
+            for(int column = 0; column < boardDimension; column++){
+                if(row % 2 == 0){
+                    if(column % 2 != 0) {
+                        lines[index] = (Line)boardElements[row][column];
+                        index++;
                     }
                 }
                 else{
-                    if(column % 2 == 0){
-                        //must maintain drawn lines
-                        Line thisLine = (Line)this.boardElements[row][column];
-                        Line newLine = (Line)newBoard.boardElements[row][column];
-                        newLine.drawn = thisLine.drawn;
-                    }
-                    else {
-                        //must maintain the same value in each box
-                        Box thisBox = (Box)this.boardElements[row][column];
-                        Box newBox = (Box)newBoard.boardElements[row][column];
-                        newBox.value = thisBox.value;
-                        newBox.isComplete = thisBox.isComplete;
+                    if(column % 2 == 0) {
+                        lines[index] = (Line)boardElements[row][column];
+                        index++;
                     }
                 }
             }
         }
-        return newBoard;
+        return lines;
+    }
+
+    public void getPlayers(AbstractPlayer player1, AbstractPlayer player2){
+        this.player1 = player1;
+        this.player2 = player2;
+    }
+
+    private AbstractBoardElement findElement(int findRow, int findColumn) {
+        //Given a row and column, returns the elements at that point
+        for (int row = 0; row < boardDimension; row++) {
+            for (int column = 0; column < boardDimension; column++) {
+                if (findRow == row && findColumn == column)
+                    return this.boardElements[row][column];
+            }
+        }
+        return null;
     }
 
     public void printBoard(){
@@ -133,38 +144,61 @@ public class Board {
 
 
     /////////////////////////////////////////////////////////////
-    //Helper methods
+    //Scoring Methods
     /////////////////////////////////////////////////////////////
 
-    private void fillBoardElement(){
-        for(int row = 0; row < boardDimension; row++){
-            for(int column = 0; column < boardDimension; column++){
-                if(row % 2 == 0){
-                    if(column % 2 == 0)
-                        boardElements[row][column] = new Dot(row, column);
-                    else
-                        boardElements[row][column] = new Line(row, column);
-                }
-                else{
-                    if(column % 2 == 0)
-                        boardElements[row][column] = new Line(row, column);
-                    else
-                        boardElements[row][column] = new Box(row, column);
+    public void checkForNewScore(){
+        //iterating over each box in boxes
+        for(Box box : boxes) {
+            //if box hasn't been marked complete...
+            if (box.scoringPlayer == null) {
+                //...but box is now Complete, set who completed it
+                if (isBoxComplete(box)) {
+                    if (isPlayer1Turn) {
+                        box.scoringPlayer = player1;
+                    } else{
+                        box.scoringPlayer = player2;
+                    }
                 }
             }
         }
     }
 
+    public void updateScore(){
+        getPlayer1Score();
+        getPlayer2Score();
+    }
+
+    public int getPlayer1Score(){
+        int player1Score = 0;
+        for(Box box : boxes) {
+            if(box.scoringPlayer == player1){
+                player1Score += box.value;
+            }
+        }
+        return player1Score;
+    }
+
+    public int getPlayer2Score(){
+        int player2Score = 0;
+        for(Box box : boxes) {
+            if(box.scoringPlayer == player2){
+                player2Score += box.value;
+            }
+        }
+        return player2Score;
+    }
+
     /////////////////////////////////////////////////////////////
-    //Moves
+    //Move Methods
     /////////////////////////////////////////////////////////////
 
-    public void makeMove(Move move){
-        //check if move is legal, make move, and update score
+    public void makeMoveOnBoard(Move move){
+        //check if move is legal, make move, update boxes to reflect score
         checkIfMoveIsLegal(move);
         Line line = (Line)findElement(move.row, move.column);
         line.drawLine();
-        updateScore(checkForScore());
+        checkForNewScore();
     }
 
     public boolean checkIfMoveIsLegal(Move move){
@@ -224,17 +258,6 @@ public class Board {
         return possibleMoves;
     }
 
-    public AbstractBoardElement findElement(int findRow, int findColumn) {
-        //Given a row and column, returns the elements at that point
-        for (int row = 0; row < boardDimension; row++) {
-            for (int column = 0; column < boardDimension; column++) {
-                if (findRow == row && findColumn == column)
-                    return this.boardElements[row][column];
-            }
-        }
-        return null;
-    }
-
     /////////////////////////////////////////////////////////////
     //Checking Boxes
     /////////////////////////////////////////////////////////////
@@ -277,56 +300,84 @@ public class Board {
 
     public boolean isBoardComplete(){
         //iterate over all boxes
-        for(int row = 1; row < boardDimension; row+= 2){
-            for(int column = 1; column < boardDimension; column+= 2){
-                Box box = (Box)this.boardElements[row][column];
-                //if box has not already been completed return false
-                if(!box.isComplete){
-                    return false;
+        for(Box box : boxes){
+            //if a box has no scoring player, board not complete
+            if(box.scoringPlayer == null){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /////////////////////////////////////////////////////////////
+    //Minimax methods
+    /////////////////////////////////////////////////////////////
+
+    public Board deepCopyBoard(){
+        //copying fields
+        Board newBoard = new Board(boardDimension);
+        newBoard.getPlayers(this.player1, this.player2);
+        newBoard.isPlayer1Turn = this.isPlayer1Turn;
+
+        //need to copy all elements over
+        for(int row = 0; row < boardDimension; row++){
+            for(int column = 0; column < boardDimension; column++){
+                if(row % 2 == 0){
+                    if(column % 2 != 0){
+                        //must maintain drawn lines
+                        Line thisLine = (Line)this.boardElements[row][column];
+                        Line newLine = (Line)newBoard.boardElements[row][column];
+                        newLine.drawn = thisLine.drawn;
+                    }
+                }
+                else{
+                    if(column % 2 == 0){
+                        //must maintain drawn lines
+                        Line thisLine = (Line)this.boardElements[row][column];
+                        Line newLine = (Line)newBoard.boardElements[row][column];
+                        newLine.drawn = thisLine.drawn;
+                    }
+                    else {
+                        //must maintain the same value in each box
+                        Box thisBox = (Box)this.boardElements[row][column];
+                        Box newBox = (Box)newBoard.boardElements[row][column];
+                        newBox.value = thisBox.value;
+                        newBox.scoringPlayer = thisBox.scoringPlayer;
+                    }
                 }
             }
         }
-        //all boxes are completed
-        return true;
+        newBoard.getBoxes();
+        newBoard.getLines();
+        return newBoard;
     }
 
     /////////////////////////////////////////////////////////////
     //Heuristic methods
     /////////////////////////////////////////////////////////////
 
-    public int evaluateBoardFunction(){
-        int evaluation = 0;
+    public int evaluateBoardFunction(AbstractPlayer player) {
+        int evaluation = new Random().nextInt(6);
 
-        //if game complete, if win then very high eval, else low
-        if(isPlayer1Turn){
-            if(isBoardComplete()){
-                if(player1Score > player2Score){
-                    evaluation += 1000;
-                }
-                else{
-                    evaluation -= 1000;
-                }
-            }
-        } else{
-            if(isBoardComplete()){
-                if(player1Score < player2Score){
-                    evaluation += 1000;
-                }
-                else{
-                    evaluation -= 1000;
-                }
-            }
-        }
+
+
+        // --- Player 1 is AI ---
+
+
+
+        // --- Player 2 is AI ---
+/*
+
 
         //increase eval by score lead
-        if(isPlayer1Turn){
+        if(maximizePlayer1){
             if(this.player1Score > this.player2Score){
-                evaluation += this.player1Score - this.player2Score;
+                evaluation += this.player1Score - player2Score;
             }
             //Maximizing score for player 2
         } else {
             if (this.player2Score > this.player1Score) {
-                evaluation += this.player2Score - this.player1Score;
+                evaluation += this.player2Score - player1Score;
             }
         }
 
@@ -335,39 +386,12 @@ public class Board {
             for(int column = 1; column < boardDimension; column+= 2){
                 Box currentBox = (Box)this.boardElements[row][column];
                 //Maximizing score for player 1
-                if(isPlayer1Turn){
-                    if(this.checkBoxForSidesComplete(currentBox) == 3){
+                    if(this.checkBoxForSidesComplete(currentBox) == 3) {
                         evaluation -= currentBox.value;
-                    }
-                //Maximizing score for player 2
-                } else{
-                    if(this.checkBoxForSidesComplete(currentBox) == 3){
-                        evaluation += currentBox.value;
-                    }
                 }
-
             }
         }
-
-        //if leave with 2 sides complete, good
-        for(int row = 1; row < boardDimension; row+= 2){
-            for(int column = 1; column < boardDimension; column+= 2){
-                Box currentBox = (Box)this.boardElements[row][column];
-                //Maximizing score for player 1
-                if(isPlayer1Turn){
-                    if(this.checkBoxForSidesComplete(currentBox) == 2){
-                        evaluation += currentBox.value;
-                    }
-                    //Maximizing score for player 2
-                } else{
-                    if(this.checkBoxForSidesComplete(currentBox) == 2){
-                        evaluation -= currentBox.value;
-                    }
-                }
-
-            }
-        }
+*/
         return evaluation;
     }
-
 }
