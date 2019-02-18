@@ -1,3 +1,5 @@
+package Game;
+
 import Board.*;
 
 import java.util.Scanner;
@@ -109,7 +111,7 @@ public class Game {
             else
                 winningPlayer = "It's a Tie!";
 
-            System.out.println("Game Over!");
+            System.out.println("Game.Game Over!");
             board.printBoard();
             System.out.printf("The Winner is: %S\n", winningPlayer);
         }

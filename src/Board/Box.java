@@ -1,5 +1,7 @@
 package Board;
 
+import Game.AbstractPlayer;
+
 import java.util.Random;
 
 public class Box extends AbstractBoardElement {

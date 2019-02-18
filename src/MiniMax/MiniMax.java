@@ -1,43 +1,46 @@
-package MinMax;
+package MiniMax;
 
 import Board.*;
+import Game.*;
 
 public class MiniMax {
-    public Board rootBoard;
+    Board rootBoard;
     int maxPry;
+    AIPlayer currentPlayer;
 
-    public MiniMax(Board rootBoard, int maxPry) {
+    public MiniMax(Board rootBoard, int maxPry, AIPlayer currentPlayer) {
         this.rootBoard = rootBoard;
         this.maxPry = maxPry;
+        this.currentPlayer = currentPlayer;
     }
 
     /////////////////////////////////////////////////////////////
-    //MiniMax no Pruning
+    //MiniMax.MiniMax no Pruning
     /////////////////////////////////////////////////////////////
 
-    public void makeAIMove(AIPlayer player){
+    public void makeAIMove(){
         if(maxPry < 0){
             throw new IllegalArgumentException("maxPry must be >0");
         }
-        miniMax(this.rootBoard, 0, player);
+        miniMax(this.rootBoard, 0);
     }
 
-    private int miniMax(Board board, int currentPry, AIPlayer currentPlayer) {
+    private int miniMax(Board board, int currentPry) {
         if(currentPry == maxPry || board.isBoardComplete()){
             //get evaluation function maxed for correct player
-            return evaluateBoardFunction(board, currentPlayer);
+            return evaluateBoardFunction(board);
         }
 
         currentPry++;
 
         if(board.activeTurnPlayer == currentPlayer){
-            return getMax(board, currentPry, currentPlayer);
+            return getMax(board, currentPry);
         } else{
-            return getMin(board, currentPry, currentPlayer);
+            return getMin(board, currentPry);
         }
     }
 
-    private  int getMax(Board board, int currentPry, AIPlayer currentPlayer){
+    private  int getMax(Board board, int currentPry){
         int maxEvaluation = Integer.MIN_VALUE;
         Move bestMove = null;
 
@@ -47,7 +50,7 @@ public class MiniMax {
             //make move
             newBoard.makeMoveOnBoard(move);
 
-            int evaluation = miniMax(newBoard, currentPry, currentPlayer);
+            int evaluation = miniMax(newBoard, currentPry);
 
             if(evaluation > maxEvaluation){
                 maxEvaluation = evaluation;
@@ -58,7 +61,7 @@ public class MiniMax {
         return maxEvaluation;
     }
 
-    private  int getMin(Board board, int currentPry, AIPlayer currentPlayer){
+    private  int getMin(Board board, int currentPry){
         int minEvaluation = Integer.MAX_VALUE;
         Move bestMove = null;
 
@@ -68,7 +71,7 @@ public class MiniMax {
             //make move
             newBoard.makeMoveOnBoard(move);
 
-            int evaluation = miniMax(newBoard, currentPry, currentPlayer);
+            int evaluation = miniMax(newBoard, currentPry);
 
             if(evaluation < minEvaluation){
                 minEvaluation = evaluation;
@@ -79,7 +82,7 @@ public class MiniMax {
         return minEvaluation;
     }
 
-    public int evaluateBoardFunction(Board board, AIPlayer currentPlayer){
+    public int evaluateBoardFunction(Board board){
         int evaluation = 0;
 
         AbstractPlayer opponent;
@@ -97,32 +100,32 @@ public class MiniMax {
     }
 
     /////////////////////////////////////////////////////////////
-    //MiniMax with Pruning
+    //MiniMax.MiniMax with Pruning
     /////////////////////////////////////////////////////////////
 
-    public void makeAIMovePruning(AIPlayer currentPlayer){
+    public void makeAIMovePruning(){
         if(maxPry < 0){
             throw new IllegalArgumentException("maxPry must be >0");
         }
-        miniMaxPruning(this.rootBoard, 0, Integer.MIN_VALUE, Integer.MAX_VALUE, currentPlayer);
+        miniMaxPruning(this.rootBoard, 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
     }
 
-    private int miniMaxPruning(Board board, int currentPry, int alpha, int beta, AIPlayer currentPlayer) {
+    private int miniMaxPruning(Board board, int currentPry, int alpha, int beta) {
         if(currentPry == maxPry || board.isBoardComplete()){
             //get evaluation function maxed for correct player
-            return evaluateBoardFunction(board, currentPlayer);
+            return evaluateBoardFunction(board);
         }
 
         currentPry++;
 
         if(board.activeTurnPlayer == currentPlayer){
-            return getMaxPruning(board, currentPry, alpha, beta, currentPlayer);
+            return getMaxPruning(board, currentPry, alpha, beta);
         } else{
-            return getMinPruning(board, currentPry, alpha, beta, currentPlayer);
+            return getMinPruning(board, currentPry, alpha, beta);
         }
     }
 
-    private  int getMaxPruning(Board board, int currentPry, int alpha, int beta, AIPlayer currentPlayer){
+    private  int getMaxPruning(Board board, int currentPry, int alpha, int beta){
         Move bestMove = null;
 
         for(Move move : board.getAllPossibleMoves()){
@@ -131,7 +134,7 @@ public class MiniMax {
             //make move, update boxes
             newBoard.makeMoveOnBoard(move);
 
-            int evaluation = miniMaxPruning(newBoard, currentPry, alpha, beta, currentPlayer);
+            int evaluation = miniMaxPruning(newBoard, currentPry, alpha, beta);
 
             if(evaluation > alpha){
                 alpha = evaluation;
@@ -148,7 +151,7 @@ public class MiniMax {
         return alpha;
     }
 
-    private  int getMinPruning(Board board, int currentPry, int alpha, int beta, AIPlayer currentPlayer){
+    private  int getMinPruning(Board board, int currentPry, int alpha, int beta){
         Move bestMove = null;
 
         for(Move move : board.getAllPossibleMoves()){
@@ -157,7 +160,7 @@ public class MiniMax {
             //make move update boxes
             newBoard.makeMoveOnBoard(move);
 
-            int evaluation = miniMaxPruning(newBoard, currentPry, alpha, beta, currentPlayer);
+            int evaluation = miniMaxPruning(newBoard, currentPry, alpha, beta);
 
             if(evaluation < beta){
                 beta = evaluation;

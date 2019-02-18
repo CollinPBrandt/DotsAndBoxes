@@ -1,6 +1,7 @@
-package Board;
+package Game;
 
-import MinMax.MiniMax;
+import Board.*;
+import MiniMax.*;
 
 public class AIPlayer extends AbstractPlayer {
 
@@ -12,8 +13,7 @@ public class AIPlayer extends AbstractPlayer {
 
     @Override
     public void makeMove(Board board) {
-        MiniMax miniMax = new MiniMax(board, prys);
-        miniMax.makeAIMovePruning(this);
+        MiniMax miniMax = new MiniMax(board, prys, this);
+        miniMax.makeAIMovePruning();
     }
-
 }

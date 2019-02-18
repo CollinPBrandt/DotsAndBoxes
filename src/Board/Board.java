@@ -1,5 +1,7 @@
 package Board;
 
+import Game.*;
+
 import java.util.ArrayList;
 
 public class Board {

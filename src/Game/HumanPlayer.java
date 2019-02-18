@@ -1,4 +1,6 @@
-package Board;
+package Game;
+
+import Board.*;
 
 import java.util.Scanner;
 

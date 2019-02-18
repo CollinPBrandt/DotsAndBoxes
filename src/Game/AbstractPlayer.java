@@ -1,4 +1,6 @@
-package Board;
+package Game;
+
+import Board.Board;
 
 public abstract class AbstractPlayer {
 
