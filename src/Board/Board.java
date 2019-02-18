@@ -1,7 +1,6 @@
 package Board;
 
 import java.util.ArrayList;
-import java.util.Random;
 
 public class Board {
 
@@ -13,10 +12,12 @@ public class Board {
     public AbstractBoardElement[][] boardElements;
     public Box[] boxes;
     public Line[] lines;
-    public boolean isPlayer1Turn;
+    //public boolean isPlayer1Turn;
 
     public AbstractPlayer player1;
     public AbstractPlayer player2;
+
+    public AbstractPlayer activeTurnPlayer;
 
     /////////////////////////////////////////////////////////////
     //Constructor
@@ -25,7 +26,6 @@ public class Board {
     public Board(int boardDimension) {
         this.boardDimension = boardDimension;
         this.boardElements = new AbstractBoardElement[boardDimension][boardDimension];
-        this.isPlayer1Turn = true;
 
         fillBoardElement();
         this.boxes = getBoxes();
@@ -89,7 +89,7 @@ public class Board {
         return lines;
     }
 
-    public void getPlayers(AbstractPlayer player1, AbstractPlayer player2){
+    public void setPlayers(AbstractPlayer player1, AbstractPlayer player2){
         this.player1 = player1;
         this.player2 = player2;
     }
@@ -154,7 +154,7 @@ public class Board {
             if (box.scoringPlayer == null) {
                 //...but box is now Complete, set who completed it
                 if (isBoxComplete(box)) {
-                    if (isPlayer1Turn) {
+                    if (activeTurnPlayer == player1) {
                         box.scoringPlayer = player1;
                     } else{
                         box.scoringPlayer = player2;
@@ -167,6 +167,13 @@ public class Board {
     public void updateScore(){
         getPlayer1Score();
         getPlayer2Score();
+    }
+
+    public int getPlayerScore(AbstractPlayer player){
+        if(player1 == player)
+            return getPlayer1Score();
+        else
+            return getPlayer2Score();
     }
 
     public int getPlayer1Score(){
@@ -199,6 +206,11 @@ public class Board {
         Line line = (Line)findElement(move.row, move.column);
         line.drawLine();
         checkForNewScore();
+        //swap active player after move
+        if(this.activeTurnPlayer == player1)
+            this.activeTurnPlayer = player2;
+        else
+            this.activeTurnPlayer = player1;
     }
 
     public boolean checkIfMoveIsLegal(Move move){
@@ -316,8 +328,9 @@ public class Board {
     public Board deepCopyBoard(){
         //copying fields
         Board newBoard = new Board(boardDimension);
-        newBoard.getPlayers(this.player1, this.player2);
-        newBoard.isPlayer1Turn = this.isPlayer1Turn;
+        //not deep copy of players
+        newBoard.setPlayers(this.player1, this.player2);
+        newBoard.activeTurnPlayer = this.activeTurnPlayer;
 
         //need to copy all elements over
         for(int row = 0; row < boardDimension; row++){
@@ -352,46 +365,5 @@ public class Board {
         return newBoard;
     }
 
-    /////////////////////////////////////////////////////////////
-    //Heuristic methods
-    /////////////////////////////////////////////////////////////
 
-    public int evaluateBoardFunction(AbstractPlayer player) {
-        int evaluation = new Random().nextInt(6);
-
-
-
-        // --- Player 1 is AI ---
-
-
-
-        // --- Player 2 is AI ---
-/*
-
-
-        //increase eval by score lead
-        if(maximizePlayer1){
-            if(this.player1Score > this.player2Score){
-                evaluation += this.player1Score - player2Score;
-            }
-            //Maximizing score for player 2
-        } else {
-            if (this.player2Score > this.player1Score) {
-                evaluation += this.player2Score - player1Score;
-            }
-        }
-
-        //if leave a box with 3 sides complete, not good
-        for(int row = 1; row < boardDimension; row+= 2){
-            for(int column = 1; column < boardDimension; column+= 2){
-                Box currentBox = (Box)this.boardElements[row][column];
-                //Maximizing score for player 1
-                    if(this.checkBoxForSidesComplete(currentBox) == 3) {
-                        evaluation -= currentBox.value;
-                }
-            }
-        }
-*/
-        return evaluation;
-    }
 }

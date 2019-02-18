@@ -12,8 +12,8 @@ public class AIPlayer extends AbstractPlayer {
 
     @Override
     public void makeMove(Board board) {
-        MiniMax miniMax = new MiniMax(board, prys, this);
-        miniMax.makeAIMovePruning();
+        MiniMax miniMax = new MiniMax(board, prys);
+        miniMax.makeAIMovePruning(this);
     }
 
 }

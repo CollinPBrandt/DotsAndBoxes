@@ -5,53 +5,49 @@ import Board.*;
 public class MiniMax {
     public Board rootBoard;
     int maxPry;
-    AIPlayer player;
 
-    public MiniMax(Board rootBoard, int maxPry, AIPlayer player) {
+    public MiniMax(Board rootBoard, int maxPry) {
         this.rootBoard = rootBoard;
         this.maxPry = maxPry;
-        this.player = player;
     }
 
     /////////////////////////////////////////////////////////////
     //MiniMax no Pruning
     /////////////////////////////////////////////////////////////
 
-    public void makeAIMove(){
+    public void makeAIMove(AIPlayer player){
         if(maxPry < 0){
             throw new IllegalArgumentException("maxPry must be >0");
         }
-        miniMax(this.rootBoard, 0);
+        miniMax(this.rootBoard, 0, player);
     }
 
-    private int miniMax(Board board, int currentPry) {
+    private int miniMax(Board board, int currentPry, AIPlayer currentPlayer) {
         if(currentPry == maxPry || board.isBoardComplete()){
             //get evaluation function maxed for correct player
-            return board.evaluateBoardFunction(player);
+            return evaluateBoardFunction(board, currentPlayer);
         }
 
         currentPry++;
 
-        if(board.isPlayer1Turn){
-            return getMax(board, currentPry);
+        if(board.activeTurnPlayer == currentPlayer){
+            return getMax(board, currentPry, currentPlayer);
         } else{
-            return getMin(board, currentPry);
+            return getMin(board, currentPry, currentPlayer);
         }
     }
 
-    private  int getMax(Board board, int currentPry){
+    private  int getMax(Board board, int currentPry, AIPlayer currentPlayer){
         int maxEvaluation = Integer.MIN_VALUE;
         Move bestMove = null;
 
         for(Move move : board.getAllPossibleMoves()){
             //make deep copy of rootBoard
             Board newBoard = board.deepCopyBoard();
-            //swap who's turn it is on new rootBoard
-            newBoard.isPlayer1Turn = !board.isPlayer1Turn;
             //make move
             newBoard.makeMoveOnBoard(move);
 
-            int evaluation = miniMax(newBoard, currentPry);
+            int evaluation = miniMax(newBoard, currentPry, currentPlayer);
 
             if(evaluation > maxEvaluation){
                 maxEvaluation = evaluation;
@@ -62,19 +58,17 @@ public class MiniMax {
         return maxEvaluation;
     }
 
-    private  int getMin(Board board, int currentPry){
+    private  int getMin(Board board, int currentPry, AIPlayer currentPlayer){
         int minEvaluation = Integer.MAX_VALUE;
         Move bestMove = null;
 
         for(Move move : board.getAllPossibleMoves()){
             //make deep copy of rootBoard
             Board newBoard = board.deepCopyBoard();
-            //swap who's turn it is on new rootBoard
-            newBoard.isPlayer1Turn = !board.isPlayer1Turn;
             //make move
             newBoard.makeMoveOnBoard(move);
 
-            int evaluation = miniMax(newBoard, currentPry);
+            int evaluation = miniMax(newBoard, currentPry, currentPlayer);
 
             if(evaluation < minEvaluation){
                 minEvaluation = evaluation;
@@ -85,44 +79,59 @@ public class MiniMax {
         return minEvaluation;
     }
 
+    public int evaluateBoardFunction(Board board, AIPlayer currentPlayer){
+        int evaluation = 0;
+
+        AbstractPlayer opponent;
+        if(board.player1 == currentPlayer){
+            opponent = board.player2;
+        } else{
+            opponent = board.player1;
+        }
+
+        //Better to have your score higher
+        evaluation += (board.getPlayerScore(currentPlayer) - board.getPlayerScore(opponent));
+
+
+        return evaluation;
+    }
+
     /////////////////////////////////////////////////////////////
     //MiniMax with Pruning
     /////////////////////////////////////////////////////////////
 
-    public void makeAIMovePruning(){
+    public void makeAIMovePruning(AIPlayer currentPlayer){
         if(maxPry < 0){
             throw new IllegalArgumentException("maxPry must be >0");
         }
-        miniMaxPruning(this.rootBoard, 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
+        miniMaxPruning(this.rootBoard, 0, Integer.MIN_VALUE, Integer.MAX_VALUE, currentPlayer);
     }
 
-    private int miniMaxPruning(Board board, int currentPry, int alpha, int beta) {
+    private int miniMaxPruning(Board board, int currentPry, int alpha, int beta, AIPlayer currentPlayer) {
         if(currentPry == maxPry || board.isBoardComplete()){
             //get evaluation function maxed for correct player
-            return board.evaluateBoardFunction(player);
+            return evaluateBoardFunction(board, currentPlayer);
         }
 
         currentPry++;
 
-        if(board.isPlayer1Turn){
-            return getMaxPruning(board, currentPry, alpha, beta);
+        if(board.activeTurnPlayer == currentPlayer){
+            return getMaxPruning(board, currentPry, alpha, beta, currentPlayer);
         } else{
-            return getMinPruning(board, currentPry, alpha, beta);
+            return getMinPruning(board, currentPry, alpha, beta, currentPlayer);
         }
     }
 
-    private  int getMaxPruning(Board board, int currentPry, int alpha, int beta){
+    private  int getMaxPruning(Board board, int currentPry, int alpha, int beta, AIPlayer currentPlayer){
         Move bestMove = null;
 
         for(Move move : board.getAllPossibleMoves()){
             //make deep copy of rootBoard
             Board newBoard = board.deepCopyBoard();
-            //swap who's turn it is on new rootBoard
-            newBoard.isPlayer1Turn = !board.isPlayer1Turn;
             //make move, update boxes
             newBoard.makeMoveOnBoard(move);
 
-            int evaluation = miniMaxPruning(newBoard, currentPry, alpha, beta);
+            int evaluation = miniMaxPruning(newBoard, currentPry, alpha, beta, currentPlayer);
 
             if(evaluation > alpha){
                 alpha = evaluation;
@@ -132,7 +141,6 @@ public class MiniMax {
             if(alpha >= beta) {
                 break;
             }
-
         }
         if(bestMove != null) {
             board.makeMoveOnBoard(bestMove);
@@ -140,18 +148,16 @@ public class MiniMax {
         return alpha;
     }
 
-    private  int getMinPruning(Board board, int currentPry, int alpha, int beta){
+    private  int getMinPruning(Board board, int currentPry, int alpha, int beta, AIPlayer currentPlayer){
         Move bestMove = null;
 
         for(Move move : board.getAllPossibleMoves()){
             //make deep copy of rootBoard
             Board newBoard = board.deepCopyBoard();
-            //swap who's turn it is on new rootBoard
-            newBoard.isPlayer1Turn = !board.isPlayer1Turn;
             //make move update boxes
             newBoard.makeMoveOnBoard(move);
 
-            int evaluation = miniMaxPruning(newBoard, currentPry, alpha, beta);
+            int evaluation = miniMaxPruning(newBoard, currentPry, alpha, beta, currentPlayer);
 
             if(evaluation < beta){
                 beta = evaluation;

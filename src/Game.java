@@ -28,26 +28,26 @@ public class Game {
     /////////////////////////////////////////////////////////////
 
     public void play(){
-
+        //makes new players depending on AI or Human
         playerSelect();
-        board.getPlayers(player1, player2);
+        board.setPlayers(player1, player2);
+        //start with player 1
+        board.activeTurnPlayer = player1;
 
         while(!gameOver){
 
             board.printBoard();
 
-            if(board.isPlayer1Turn)
+            //if it's player 1 turn...
+            if(board.activeTurnPlayer == player1) {
                 System.out.println("\nPlayer 1's Turn:");
-            else
-                System.out.println("\nPlayer 2's Turn:");
-
-            if(board.isPlayer1Turn)
                 player1.makeMove(board);
-            else
+            }
+            //if its player 2 turn...
+            else {
+                System.out.println("\nPlayer 2's Turn:");
                 player2.makeMove(board);
-
-            //Switch whose turn it is
-            board.isPlayer1Turn = !board.isPlayer1Turn;
+            }
 
             isGameOver();
             printScore();
